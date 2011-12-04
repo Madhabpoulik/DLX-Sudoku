@@ -60,8 +60,8 @@ It is the same example matrix used in _`Knuth's paper`.
 
 Compiling
 =========
-
 ::
+
     make ssudoku
     make test
 
