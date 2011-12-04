@@ -162,9 +162,9 @@ static void init(hnode *h, hnode columns[], int ids[], node nodes[][NTYPES])
 }
 
 /**
- * @brief solvez puzzle and puts solution in buf
- * @param buf   char array, must be at least 82 characters long to hold
- * solution.
+ * @brief solves puzzle and puts solution in buf
+ * @param buf   char array, must have space 82 characters long to hold
+ *              solution and null terminator byte.
  * @return -1 if unsolveable, 0 if solution found.
  */
 int sudoku_solve(const char *puzzle, char *buf)
