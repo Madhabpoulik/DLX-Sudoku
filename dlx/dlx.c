@@ -88,8 +88,7 @@ size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
          * call stack somehow.  In order for this to be general enough to allow
          * the client code to print the solutions however it wants, we have to
          * unwind the stack all the way back to the client while keeping the
-         * solutions intact.  A nonzero return value signifies a solution has
-         * been found (of size k), so don't touch it.
+         * solutions intact.  
          */
         return k;
     }
@@ -127,9 +126,10 @@ size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
         while ((j = j->left) != i)
             uncover(j->chead);
 
-        /* if the recursive calls succeeded we need to return immediately or the
-         * outer while loop will indiscriminately try all the other rows,
-         * wasting time and overwriting the solution
+        /* if the recursive calls succeeded we need to return immediately or
+         * the outer while loop will indiscriminately try all the other rows,
+         * wasting time and overwriting the solution,  A nonzero return value
+         * signifies a solution has been found (of size n), so don't touch it.
          */
         if (n > 0) 
             return n;
@@ -163,7 +163,7 @@ void dlx_force_row(node *r)
  * untouched.
  *
  * @param h         pointer to root node
- * @param headers   pre-allocated chunk of n hnodes
+ * @param headers   pre-allocated contiguous chunk of n hnodes
  * @param n         number of column headers, not including root node h
  * @return h
  */
@@ -222,12 +222,11 @@ hnode *dlx_make_headers(hnode *h, hnode *headers, size_t n)
 }
 
 /**
- * @brief make a circularly linked node row out of row r of the pre-allocated
- * r by n nodes array, then insert the row into the correct columns determined
- * by the n col_ids.
+ * @brief make a circularly linked node row of n nodes out of the pre-allocated
+ * nodes array of size n, then insert the row into the correct columns
+ * determined by the n col_ids.
  *
- * @param nodes pre-allocated node block of size at least r rows by n columns
- * @param r     allocated row of nodes array to initialize
+ * @param nodes     contiguous, pre-allocated node block of size n
  * @param headers   contiguous, pre-initialized column headers array
  * @param cols      int[n] containg column indices in increasing order
  * @param n     number of nodes per row in nodes
