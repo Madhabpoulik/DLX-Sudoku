@@ -20,10 +20,9 @@ DLX
 Files: dlx.c, dlx.h
 
 `DLX`_ refers to the Dancing Links Algorithm for solving exact cover
-matrix problems described by Donald Knuth `here`__.  The code in the
-``dlx/`` subdirectory implements this generic algorithm, along with a
-few utility functions to make constructing the interlocking linked lists
-easier.
+matrix problems `described`__ by Donald Knuth.  The code in the ``dlx/``
+subdirectory implements this generic algorithm, along with a few utility
+functions to make constructing the interlocking linked lists easier.
 
 .. _DLX: http://en.wikipedia.org/wiki/Dancing_links
 .. _Knuth's paper:
