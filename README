@@ -1,0 +1,70 @@
+.. README
+
+==========
+DLX Sudoku
+==========
+:Author: jw013
+:Date: Dec 2011
+:Version: 0.1
+
+Components
+==========
+
+* DLX module
+* Sudoku module
+* Matrix module
+
+DLX
+---
+
+Files: dlx.c, dlx.h
+
+`DLX`_ refers to the Dancing Links Algorithm for solving exact cover
+matrix problems described by Donald Knuth `here`__.  The code in the
+``dlx/`` subdirectory implements this generic algorithm, along with a
+few utility functions to make constructing the interlocking linked lists
+easier.
+
+.. _DLX: http://en.wikipedia.org/wiki/Dancing_links
+.. _Knuth's paper:
+__ http://www-cs-faculty.stanford.edu/~uno/papers/dancing-color.ps.gz
+
+Sudoku
+------
+
+`Sudoku`__ can be converted to an exact cover problem, and this is
+exactly what the code in the ``sudoku/`` directory does.  The process is
+described in detail in the header comments of ``sudoku.c``, as well as
+by `Wikipedia's article on exact cover`__.
+
+__ http://en.wikipedia.org/wiki/Sudoku
+__ http://en.wikipedia.org/wiki/Exact_cover#Sudoku
+
+A driver program is provided in ``main.c``, and compiles into the
+``ssudoku`` target.  Puzzles are read on standard input and solutions
+are sent to standard output.  The representation used for input and
+output Sudoku puzzles is a string of 81 characters, each one
+representing a cell in the 9x9 sudoku grid, from left to right, top to
+bottom.  Digits 1-9 are represented by the characters '1' - '9', and any
+other character is treated as a blank.
+
+Matrix
+------
+
+This module is not really related to the rest of the project.  The code
+``matrix.c`` provides a single function which takes an integer array of
+only 0 and 1 and converts it to the 2D linked list format DLX uses.
+
+A sample driver program with a hard-coded matrix is located ``test.c``.
+It is the same example matrix used in _`Knuth's paper`.
+
+Compiling
+=========
+
+::
+    make ssudoku
+    make test
+
+There are two executable makefile targets.  The sudoku solver described
+above in _`Sudoku` is ``ssudoku``, and the matrix test program described
+in _`Matrix` is ``test``.
