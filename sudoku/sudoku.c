@@ -53,7 +53,6 @@
  *   - 81 rows in solution
  */
 
-#include <assert.h>
 #include <stdlib.h>
 #include "dlx.h"
 #include "sudoku.h"
@@ -69,10 +68,11 @@ static void get_ids(int col_ids[], int r, int c, int n)
 
     /* The constraint to id mapping is as follows:
      *
-     * The 81 cell id's come first, then 81 row id's, then column id's, and
-     * finally 81 region id's.  The code shows the formulas to obtain each from
-     * r, c, n.  All the subtracted constants are to correct for all three of r,
-     * c, n being 1-indexed, while the ids are 0-indexed.
+     * The 81 cell constraint id's come first, then 81 row constraint id's,
+     * then column constraint id's, and finally 81 region constraint id's.  The
+     * code shows the formulas to obtain each from r, c, n.  All the subtracted
+     * constants are to correct for all three of r, c, n being 1-indexed, while
+     * the ids are 0-indexed.
      */
     col_ids[CELL_ID]    = CELL_ID   * 81 + (9 * r) - 9 + c - 1;
     col_ids[ROW_ID]     = ROW_ID    * 81 + (9 * r) - 9 + n - 1;
@@ -81,8 +81,16 @@ static void get_ids(int col_ids[], int r, int c, int n)
 }
 
 /**
- * @brief helper function to colid2row: computes as many of the parameters r, c,
- * n, R as it can given the input col id.
+ * @brief Computes row index given digit n in row r col c
+ */
+static size_t row_id(int r, int c, int n)
+{
+    return ((9 * r) - 9 + c - 1) * 9 + n - 1;
+}
+
+/**
+ * @brief helper function to colid2rowid: computes as many of the parameters r,
+ * c, n, R as it can given the input col id.  Reverse of function get_ids.
  */
 static void fill_values(int col, int *r, int *c, int *n, int *R)
 {
@@ -107,7 +115,7 @@ static void fill_values(int col, int *r, int *c, int *n, int *R)
  *
  * @return row index according to ordering described in init().
  */
-static size_t colid2row(int col1, int col2, int col3)
+static size_t colid2rowid(int col1, int col2, int col3)
 {
     int r, c, n, R;
     r = c = n = R = 0;
@@ -117,17 +125,19 @@ static size_t colid2row(int col1, int col2, int col3)
     fill_values(col3, &r, &c, &n, &R);
 
     /* with 3 values we are guaranteed to have r, c, and n */
-    return ((9 * r) - 9 + c - 1) * 9 + n - 1;
+    return row_id(r, c, n);
 }
 
 
 /**
- * @brief creates a full dlx array with 324 columns and 729 rows, corresponding
- * to the entire search space with nothing eliminated.  All storage must be
- * pre-allocated.  Every argument is initialized to appropriate values.  The
- * rows are grouped by cell, in the standard cell order described in the file
- * header comments.  Thus, the first row corresponds to 1 in (1,1), the 2nd row
- * is a 2 in (1,1), all the way up to the last row being a 9 in (9,9).
+ * @brief initializes the links in the preallocated nodes to a full dlx array
+ * with 324 columns and 729 rows, corresponding to the entire search space with
+ * nothing eliminated.  
+ *
+ * All storage must be pre-allocated; this function only does initialization.
+ * The rows are grouped by cell, in the standard cell order described in the
+ * file header comments.  Thus, the first row corresponds to 1 in (1,1), the
+ * 2nd row is a 2 in (1,1), all the way up to the last row being a 9 in (9,9).
  */
 static void init(hnode *h, hnode columns[], int ids[], node nodes[][NTYPES])
 {
@@ -156,13 +166,16 @@ static void init(hnode *h, hnode columns[], int ids[], node nodes[][NTYPES])
             for (k = 1; k < 9 + 1; k++) {   /* number */
                 /* (i, j, k) is the number k in row i, column j */
                 get_ids(col_ids, i, j, k);
-                dlx_make_row(nodes[0] + NTYPES * r, columns, col_ids, NTYPES);
+                dlx_make_row(nodes[r], columns, col_ids, NTYPES);
                 r++;
             }
 }
 
 /**
  * @brief solves puzzle and puts solution in buf
+ * @param puzzle    81 char string representing puzzle.  Cells go in order left
+ *                  to right, top to bottom; char '1' - '9' represent
+ *                  corresponding digits; any other char represents a blank
  * @param buf   char array, must have space 82 characters long to hold
  *              solution and null terminator byte.
  * @return -1 if unsolveable, 0 if solution found.
@@ -209,11 +222,9 @@ int sudoku_solve(const char *puzzle, char *buf)
     if (s < 81)     /* no solution found */
         return -1;
 
-    assert(s == 81);
-
-    /* else, process solution into string form */
+    /* process solution into string form */
     for (i = 0; i < s; i++) {
-        n = colid2row(*(int *) (solution[i]->chead->id),
+        n = colid2rowid(*(int *) (solution[i]->chead->id),
                       *(int *) (solution[i]->right->chead->id),
                       *(int *) (solution[i]->right->right->chead->id));
         buf[n / 9] = n % 9 + '1';
