@@ -13,29 +13,66 @@
 /* All algorithms taken straight out of Knuth's DLX paper */
 
 /**
+ * @brief Utility function to remove a node from its horizontal left-right list
+ */
+static void remove_lr(node *n)
+{
+    n->left->right = n->right;
+    n->right->left = n->left;
+}
+
+/**
+ * @brief Utility function to remove a node from its vertical up-down list
+ */
+static void remove_ud(node *n)
+{
+    n->up->down = n->down;
+    n->down->up = n->up;
+}
+
+/**
+ * @brief Utility function to restore a node to its horizontal left-right list
+ */
+static void restore_lr(node *n)
+{
+    n->left->right = n->right->left = n;
+}
+
+/**
+ * @brief Utility function to restore a node to its vertical up-down list
+ */
+static void restore_ud(node *n)
+{
+    n->up->down = n->down->up = n;
+}
+
+/**
  * @brief removes c from the header list and all rows it intersects from each
  * of their columns.
  */
 static void cover(hnode *c)
 {
-    node *cb;       /* c base: cast c to (node *) */
     node *i, *j;
+    node *cb = (node *) c;
 
-    cb = (node *) c;
-    /* drop c out of the column headers list */
-    cb->right->left = cb->left;
-    cb->left->right = cb->right;
+    /* An illustration: x represents nodes to remove. 
+     *                  c is a column header. 
+     *                  n is a normal node
+     *
+     * c c c x c c
+     * n   n   n
+     *   x   x x  
+     *   n     n n
+     *     x x   x
+     */
 
-    /* for each row i in the column ... */
+    remove_lr(cb);
+
     i = cb;
     while ((i = i->down) != cb) {
-        /* drop the entire row containing i from the array, but leave the
-         * column itself alone */
         j = i;
         while ((j = j->right) != i) {
-            /* drop node from its column */
-            j->down->up = j->up;
-            j->up->down = j->down;
+            remove_ud(j);
             (j->chead->s)--;        /* update column node count */
         }
     }
@@ -59,15 +96,11 @@ static void uncover(hnode *c)
         j = i;
         while ((j = j->left) != i) {
             (j->chead->s)++;        /* update column node count */
-            /* restore node to its column */
-            j->down->up = j;
-            j->up->down = j;
+            restore_ud(j);
         }
     }
 
-    /* restore c back to the column headers list */
-    cb->right->left = cb;
-    cb->left->right = cb;
+    restore_lr(cb);
 }
 
 /**
@@ -76,11 +109,9 @@ static void uncover(hnode *c)
  */
 size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
 {
-    node *hb;       /* h base: cast h to (node *) */
     size_t min, n;  /* for finding column with min s */
     node *i, *j, *cb;
-
-    hb = (node *) h;
+    node *hb = (node *) h;
 
     /* if array has no columns left, we are done */
     if (hb->right == hb) {
@@ -95,8 +126,8 @@ size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
 
     /* find a column "*cb" with min size "min" */
     min = -1u;
-    i   = hb;
     cb  = NULL;
+    i   = hb;
     while ((i = i->right) != hb) {
         n = ((hnode *) i)->s;
         if (n < min) {
@@ -108,36 +139,36 @@ size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
     cover((hnode *) cb);
 
     n = 0;      /* return value if cb is empty */
-    /* for each row i in column ... */
+    /* guess each row in column cb one at a time and recurse */
     i = cb;
     while ((i = i->down) != cb) {
-        /* guess the row as solution */
         solution[k] = i;
-        /* cover all of the columns in the row */
+
+        /* cover all of the columns in the new row */
         j = i;
         while ((j = j->right) != i) 
             cover(j->chead);
 
         n = dlx_exact_cover(solution, h, k + 1);     /* recurse */
 
-        /* restore the matrix links; makes freeing it later easier for the
-         * client */
+        /* restore the node links: uncover in reverse order */
         j = i;
         while ((j = j->left) != i)
             uncover(j->chead);
 
-        /* if the recursive calls succeeded we need to return immediately or
-         * the outer while loop will indiscriminately try all the other rows,
-         * wasting time and overwriting the solution,  A nonzero return value
-         * signifies a solution has been found (of size n), so don't touch it.
+        /* if the recursive calls succeeded, a solution has been found with the
+         * current row, don't bother with the rest; return and unwind the stack
          */
         if (n > 0) 
             return n;
     }
 
-    uncover((hnode *) cb);  /* restore matrix links as above */
+    /* end of loop with no solution found,
+     * so restore node links and backtrack */
 
-    return n;
+    uncover((hnode *) cb);
+
+    return n;   /* n should be 0 */
 }
 
 /**
@@ -149,12 +180,24 @@ size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
  */
 void dlx_force_row(node *r)
 {
-    node *i;
-
-    i = r;
+    node *i = r;
     do {
         cover(i->chead);
     } while ((i = i->right) != r);
+}
+
+/**
+ * @brief Undoes a dlx_force_row.  Must be called in reverse order or else
+ * links will not be restored properly.
+ */
+void dlx_unselect_row(node *r)
+{
+    node *i = r;
+    /* reverse order of dlx_force_row */
+    while ((i = i->left) != r) {
+        uncover(i->chead);
+    }
+    uncover(r->chead);
 }
 
 /**

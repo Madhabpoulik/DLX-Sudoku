@@ -25,7 +25,7 @@ struct node_s {
 /** header node */
 struct headnode_s {
     struct node_s base_node;
-    size_t        s;    /**< number of nodes in the column, excluding header */
+    size_t        s;    /**< number of nodes in the list, excluding itself */
     void          *id;  /**< unique identifier for the node list */
 };
 
@@ -34,6 +34,7 @@ typedef struct headnode_s hnode;
 
 size_t dlx_exact_cover(node *solution[], hnode *h, size_t k);
 void dlx_force_row(node *r);
+void dlx_unselect_row(node *r);
 hnode *dlx_make_headers(hnode *h, hnode *headers, size_t n);
 void dlx_make_row(node *nodes, hnode *headers, int cols[], size_t n);
 
