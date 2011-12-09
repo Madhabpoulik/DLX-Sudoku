@@ -12,39 +12,45 @@
 
 /* All algorithms taken straight out of Knuth's DLX paper */
 
-/**
- * @brief Utility function to remove a node from its horizontal left-right list
- */
+/** @brief Utility function to remove a node from its horizontal left-right list */
 static void remove_lr(node *n)
 {
     n->left->right = n->right;
     n->right->left = n->left;
 }
 
-/**
- * @brief Utility function to remove a node from its vertical up-down list
- */
+/** @brief Utility function to remove a node from its vertical up-down list */
 static void remove_ud(node *n)
 {
     n->up->down = n->down;
     n->down->up = n->up;
 }
 
-/**
- * @brief Utility function to restore a node to its horizontal left-right list
- */
+/** @brief Utility function to restore a node to its horizontal left-right list */
 static void insert_lr(node *n)
 {
     n->left->right = n->right->left = n;
 }
 
-/**
- * @brief Utility function to restore a node to its vertical up-down list
- */
+/** * @brief Utility function to restore a node to its vertical up-down list */
 static void insert_ud(node *n)
 {
     n->up->down = n->down->up = n;
 }
+
+/* A node has been removed from its list if and only if both neighbors
+ * do not point to itself.
+ *
+ * It is not possible for a node to be half in the list, so only one side is
+ * checked.
+ */
+
+/** @return 1 if node has been removed from its up-down list, 0 otherwise */
+static int is_removed_ud(node *n)
+{
+    return n->up->down != n;
+}
+
 
 /**
  * @brief removes c from the header list and all rows it intersects from each
@@ -176,27 +182,39 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
  *
  * This can be useful if you want to force a certain row to be included in the
  * solution (hence the name).
+ *
+ * @return 0 on success, -1 if r had already been removed
  */
-void dlx_force_row(node *r)
+int dlx_force_row(node *r)
 {
     node *i = r;
+    if (is_removed_ud(r)) 
+        return -1;
+
     do {
         cover(i->chead);
     } while ((i = i->right) != r);
+    return 0;
 }
 
 /**
  * @brief Undoes a dlx_force_row.  Must be called in reverse order or else
  * links will not be restored properly.
+ *
+ * @return 0 on success, -1 if r has not been removed
  */
-void dlx_unselect_row(node *r)
+int dlx_unselect_row(node *r)
 {
-    /* reverse order of dlx_force_row */
     node *i = r;
+    if (!is_removed_ud(r))
+        return -1;
+
+    /* reverse order of dlx_force_row */
     while ((i = i->left) != r) {
         uncover(i->chead);
     }
     uncover(r->chead);
+    return 0;
 }
 
 /**

@@ -213,10 +213,20 @@ int sudoku_solve(const char *puzzle, char *buf)
              * is simple to calculate
              * pick any node in the row (i.e. first one), and force select it */
             ni = nodes[i * 9 + c - 1];
-            dlx_force_row(ni);
+            if (dlx_force_row(ni) != 0) {
+                /* non-zero return means ni has already been removed, meaning
+                 * it conflicts with a previously encountered given, so puzzle
+                 * is invalid */
+                n = -1u;
+                break;
+            }
             solution[n++] = ni;     /* add given row to solution, increment count */
         }
     }
+
+    /* invalid givens, no point trying for a solution */
+    if (n > 81)
+        return -1;
 
     s = dlx_exact_cover(solution + n, &root, 0);
     s += n;
