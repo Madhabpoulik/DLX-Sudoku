@@ -33,7 +33,7 @@ static void remove_ud(node *n)
 /**
  * @brief Utility function to restore a node to its horizontal left-right list
  */
-static void restore_lr(node *n)
+static void insert_lr(node *n)
 {
     n->left->right = n->right->left = n;
 }
@@ -41,7 +41,7 @@ static void restore_lr(node *n)
 /**
  * @brief Utility function to restore a node to its vertical up-down list
  */
-static void restore_ud(node *n)
+static void insert_ud(node *n)
 {
     n->up->down = n->down->up = n;
 }
@@ -50,10 +50,10 @@ static void restore_ud(node *n)
  * @brief removes c from the header list and all rows it intersects from each
  * of their columns.
  */
-static void cover(hnode *c)
+static void cover(hnode *chead)
 {
     node *i, *j;
-    node *cb = (node *) c;
+    node *c = (node *) chead;
 
     /* An illustration: x represents nodes to remove. 
      *                  c is a column header. 
@@ -66,10 +66,10 @@ static void cover(hnode *c)
      *     x x   x
      */
 
-    remove_lr(cb);
+    remove_lr(c);
 
-    i = cb;
-    while ((i = i->down) != cb) {
+    i = c;
+    while ((i = i->down) != c) {
         j = i;
         while ((j = j->right) != i) {
             remove_ud(j);
@@ -82,39 +82,38 @@ static void cover(hnode *c)
  * @brief restores all rows c intersects to their respective columns, then
  * inserts c back into the header list
  */
-static void uncover(hnode *c)
+static void uncover(hnode *chead)
 {
-    node *cb;       /* c base: cast c to (node *) */
     node *i, *j;
+    node *c = (node *) chead;
 
-    cb = (node *) c;
     /* for each row i in column ... 
      * traversed in opposite order from cover() */
-    i = cb;
-    while ((i = i->up) != cb) {
+    i = c;
+    while ((i = i->up) != c) {
         /* restore all other nodes in the row to their columns */
         j = i;
         while ((j = j->left) != i) {
             (j->chead->s)++;        /* update column node count */
-            restore_ud(j);
+            insert_ud(j);
         }
     }
 
-    restore_lr(cb);
+    insert_lr(c);
 }
 
 /**
  * @brief Exact cover DLX algorithm by Knuth, adapted to C.
  * @return 0 if no solution, size of solution otherwise
  */
-size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
+size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
 {
     size_t min, n;  /* for finding column with min s */
-    node *i, *j, *cb;
-    node *hb = (node *) h;
+    node *i, *j, *c;
+    node *h = (node *) root;
 
     /* if array has no columns left, we are done */
-    if (hb->right == hb) {
+    if (h->right == h) {
         /* Knuth's version: print solutions here, and break out of the recursive
          * call stack somehow.  In order for this to be general enough to allow
          * the client code to print the solutions however it wants, we have to
@@ -124,24 +123,24 @@ size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
         return k;
     }
 
-    /* find a column "*cb" with min size "min" */
+    /* find a column "*c" with min size "min" */
     min = -1u;
-    cb  = NULL;
-    i   = hb;
-    while ((i = i->right) != hb) {
+    c  = NULL;
+    i   = h;
+    while ((i = i->right) != h) {
         n = ((hnode *) i)->s;
         if (n < min) {
             min = n;
-            cb  = i;
+            c  = i;
         }
     }
 
-    cover((hnode *) cb);
+    cover((hnode *) c);
 
-    n = 0;      /* return value if cb is empty */
-    /* guess each row in column cb one at a time and recurse */
-    i = cb;
-    while ((i = i->down) != cb) {
+    n = 0;      /* return value if c is empty */
+    /* guess each row in column c one at a time and recurse */
+    i = c;
+    while ((i = i->down) != c) {
         solution[k] = i;
 
         /* cover all of the columns in the new row */
@@ -149,7 +148,7 @@ size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
         while ((j = j->right) != i) 
             cover(j->chead);
 
-        n = dlx_exact_cover(solution, h, k + 1);     /* recurse */
+        n = dlx_exact_cover(solution, root, k + 1);     /* recurse */
 
         /* restore the node links: uncover in reverse order */
         j = i;
@@ -166,7 +165,7 @@ size_t dlx_exact_cover(node *solution[], hnode *h, size_t k)
     /* end of loop with no solution found,
      * so restore node links and backtrack */
 
-    uncover((hnode *) cb);
+    uncover((hnode *) c);
 
     return n;   /* n should be 0 */
 }
@@ -192,8 +191,8 @@ void dlx_force_row(node *r)
  */
 void dlx_unselect_row(node *r)
 {
-    node *i = r;
     /* reverse order of dlx_force_row */
+    node *i = r;
     while ((i = i->left) != r) {
         uncover(i->chead);
     }
@@ -210,31 +209,31 @@ void dlx_unselect_row(node *r)
  * @param n         number of column headers, not including root node h
  * @return h
  */
-hnode *dlx_make_headers(hnode *h, hnode *headers, size_t n)
+hnode *dlx_make_headers(hnode *root, hnode *headers, size_t n)
 {
-    node *hb, *ni;
+    node *h, *ni;
     size_t i;
 
     /* set up the root node */
-    hb = (node *) h;
-    hb->left    = (node *) (headers + n - 1);
-    hb->right   = (node *) headers;
-    hb->up      = NULL;
-    hb->down    = NULL;
-    hb->chead   = NULL;
-    h->s    = 0;
+    h = (node *) root;
+    h->left     = (node *) (headers + n - 1);
+    h->right    = (node *) headers;
+    h->up       = NULL;
+    h->down     = NULL;
+    h->chead    = NULL;
+    root->s     = 0;
 
     /* set up the rest of the column headers:
      * left and right links point left and right
      * up and down links point to self
      * chead not used
      * initial size s is 0
-     * id is the corresponding id entry
+     * id is not touched
      */
 
     /* first column header */
     ni = (node *) headers;
-    ni->left    = hb;
+    ni->left    = h;
     ni->right   = (node *) (headers + 1);
     ni->up      = ni;
     ni->down    = ni;
@@ -249,19 +248,19 @@ hnode *dlx_make_headers(hnode *h, hnode *headers, size_t n)
         ni->up      = ni;
         ni->down    = ni;
         ni->chead   = NULL;
-        headers[i].s    = 0;
+        ((hnode *) ni)->s   = 0;
     }
 
     /* last column header */
     ni = (node *) (headers + n - 1);
     ni->left    = (node *) (headers + n - 2);
-    ni->right   = hb;
+    ni->right   = h;
     ni->up      = ni;
     ni->down    = ni;
     ni->chead   = NULL;
-    headers[n - 1].s    = 0;
+    ((hnode *) ni)->s   = 0;
 
-    return h;
+    return root;
 }
 
 /**
@@ -287,8 +286,7 @@ void dlx_make_row(node *nodes, hnode *headers, int cols[], size_t n)
     ni->chead = headers + cols[0];
     ni->up    = ((node *) ni->chead)->up;
     ni->down  = (node *) ni->chead;
-    ni->up->down = ni;
-    ni->down->up = ni;
+    insert_ud(ni);
     (ni->chead->s)++;
 
     ni++;
@@ -301,8 +299,7 @@ void dlx_make_row(node *nodes, hnode *headers, int cols[], size_t n)
 
         ni->up      = ((node *) ni->chead)->up;
         ni->down    = (node *) ni->chead;
-        ni->up->down    = ni;
-        ni->down->up    = ni;
+        insert_ud(ni);
         (ni->chead->s)++;
     }
 
@@ -312,8 +309,7 @@ void dlx_make_row(node *nodes, hnode *headers, int cols[], size_t n)
     ni->chead = headers + cols[n - 1];
     ni->up    = ((node *) ni->chead)->up;
     ni->down  = (node *) ni->chead;
-    ni->up->down    = ni;
-    ni->down->up    = ni;
+    insert_ud(ni);
     (ni->chead->s)++;
 }
 
