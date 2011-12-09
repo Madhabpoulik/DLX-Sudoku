@@ -115,14 +115,16 @@ static void fill_values(int col, int *r, int *c, int *n, int *R)
  *
  * @return row index according to ordering described in init().
  */
-static size_t colid2rowid(int col1, int col2, int col3)
+static size_t row2row_id(node * rn)
 {
     int r, c, n, R;
     r = c = n = R = 0;
 
-    fill_values(col1, &r, &c, &n, &R);
-    fill_values(col2, &r, &c, &n, &R);
-    fill_values(col3, &r, &c, &n, &R);
+    fill_values(*(int *) (rn->chead->id), &r, &c, &n, &R);
+    rn = rn->right;
+    fill_values(*(int *) (rn->chead->id), &r, &c, &n, &R);
+    rn = rn->right;
+    fill_values(*(int *) (rn->chead->id), &r, &c, &n, &R);
 
     /* with 3 values we are guaranteed to have r, c, and n */
     return row_id(r, c, n);
@@ -139,14 +141,14 @@ static size_t colid2rowid(int col1, int col2, int col3)
  * file header comments.  Thus, the first row corresponds to 1 in (1,1), the
  * 2nd row is a 2 in (1,1), all the way up to the last row being a 9 in (9,9).
  */
-static void init(hnode *h, hnode columns[], int ids[], node nodes[][NTYPES])
+static void init(hnode *root, hnode columns[], int ids[], node nodes[][NTYPES])
 {
     int i, j, k;
     size_t r;
     int col_ids[NTYPES];
 
     /* set up circularly linked list */
-    dlx_make_headers(h, columns, NCOLS);
+    dlx_make_headers(root, columns, NCOLS);
 
     /* initialize id member in all header nodes */
     /* initialize ids array */
@@ -154,7 +156,7 @@ static void init(hnode *h, hnode columns[], int ids[], node nodes[][NTYPES])
         columns[i].id = ids + i;
         ids[i] = i;
     }
-    h->id = NULL;
+    root->id = NULL;
 
     /* add the 729 rows to the matrix.  This is done by looping through all 729
      * cell-number combinations, calculating the correct column ids, and writing
@@ -183,7 +185,7 @@ static void init(hnode *h, hnode columns[], int ids[], node nodes[][NTYPES])
 int sudoku_solve(const char *puzzle, char *buf)
 {
     /* data structures as described in file comment above */
-    hnode h;
+    hnode root;
     hnode headers[NCOLS];
     int   ids[NCOLS];
     node  nodes[NROWS][NTYPES];
@@ -199,7 +201,7 @@ int sudoku_solve(const char *puzzle, char *buf)
      * one at a time using the forced row selection of the dlx module
      */
 
-    init(&h, headers, ids, nodes);
+    init(&root, headers, ids, nodes);
 
     /* process givens: iterate through all cells */
     n = 0;      /* num givens found so far */
@@ -216,7 +218,7 @@ int sudoku_solve(const char *puzzle, char *buf)
         }
     }
 
-    s = dlx_exact_cover(solution + n, &h, 0);
+    s = dlx_exact_cover(solution + n, &root, 0);
     s += n;
 
     if (s < 81)     /* no solution found */
@@ -224,9 +226,7 @@ int sudoku_solve(const char *puzzle, char *buf)
 
     /* process solution into string form */
     for (i = 0; i < s; i++) {
-        n = colid2rowid(*(int *) (solution[i]->chead->id),
-                      *(int *) (solution[i]->right->chead->id),
-                      *(int *) (solution[i]->right->right->chead->id));
+        n = row2row_id(solution[i]);
         buf[n / 9] = n % 9 + '1';
     }
     buf[81] = '\0';
