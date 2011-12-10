@@ -173,6 +173,15 @@ static void init(sudoku_dlx *puzzle_dlx)
             }
 }
 
+/**
+ * @brief Remove givens from the full dlx matrix while making sure the puzzle
+ * is still valid.
+ *
+ * @param solution  givens are added here in the order they are processed
+ *
+ * @return number of givens found, or some number > 81 if any givens conflict
+ *         (which means puzzle is invalid and has no solution)
+ */
 static int
 process_givens(const char *givens, sudoku_dlx *puzzle_dlx, node *solution[])
 {
