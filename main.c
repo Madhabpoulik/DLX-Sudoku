@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include "sudoku.h"
 
 static const char *optstring = "vc:";
@@ -50,23 +51,37 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (NULL != fgets(puzzle, sizeof(puzzle), stdin)) {
-        if (g_count > 0) {
-            n = sudoku_nsolve(puzzle, solution, g_count);
-            if (g_verbose_flag)
-                fprintf(stderr, "%lu\n", (unsigned long) n);
-            if (n > 0)
-                printf("%s\n", solution);
-            exit(2);
+    for (c = 0; c < 82; c++)    /* just to be safe when calling strlen */
+        puzzle[c] = '\0';
+
+    /* read 81 char, else error exit */
+    while ((n = strlen(puzzle)) < 81) {
+        if (NULL == fgets(puzzle, sizeof(puzzle), stdin))
+            break;
+    }
+    if ((n = strlen(puzzle)) < 81) {
+        if (g_verbose_flag)
+            fprintf(stderr,
+                    "Error: not enough characters for a full 9x9 puzzle\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* read successful, now process puzzle */
+    if (g_count > 0) {
+        n = sudoku_nsolve(puzzle, solution, g_count);
+        if (g_verbose_flag)
+            fprintf(stderr, "%lu\n", (unsigned long) n);
+        if (n > 0)
+            printf("%s\n", solution);
+        exit(2);
+    } else {
+        if (sudoku_solve(puzzle, solution)) {
+            printf("%s\n", solution);
+            exit(EXIT_SUCCESS);
         } else {
-            if (sudoku_solve(puzzle, solution)) {
-                printf("%s\n", solution);
-                exit(EXIT_SUCCESS);
-            } else {
-                if (g_verbose_flag)
-                    fprintf(stderr, "No solution found.\n");
-                exit(EXIT_FAILURE);
-            }
+            if (g_verbose_flag)
+                fprintf(stderr, "No solution found.\n");
+            exit(EXIT_FAILURE);
         }
     }
     return 0;
