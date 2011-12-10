@@ -54,7 +54,6 @@
  */
 
 #include <stdlib.h>
-#include "dlx.h"
 #include "sudoku.h"
 
 /**
@@ -132,31 +131,31 @@ static size_t row2row_id(node * rn)
 
 
 /**
- * @brief initializes the links in the preallocated nodes to a full dlx array
- * with 324 columns and 729 rows, corresponding to the entire search space with
- * nothing eliminated.  
+ * @brief initializes the links in the preallocated nodes to a full sudoku dlx
+ * array with 324 columns and 729 rows, corresponding to the entire search
+ * space with nothing eliminated.  
  *
  * All storage must be pre-allocated; this function only does initialization.
  * The rows are grouped by cell, in the standard cell order described in the
  * file header comments.  Thus, the first row corresponds to 1 in (1,1), the
  * 2nd row is a 2 in (1,1), all the way up to the last row being a 9 in (9,9).
  */
-static void init(hnode *root, hnode columns[], int ids[], node nodes[][NTYPES])
+static void init(sudoku_dlx *puzzle_dlx)
 {
     int i, j, k;
     size_t r;
     int col_ids[NTYPES];
 
     /* set up circularly linked list */
-    dlx_make_headers(root, columns, NCOLS);
+    dlx_make_headers(&puzzle_dlx->root, puzzle_dlx->headers, NCOLS);
 
     /* initialize id member in all header nodes */
     /* initialize ids array */
     for (i = 0; i < NCOLS; i++) {
-        columns[i].id = ids + i;
-        ids[i] = i;
+        puzzle_dlx->headers[i].id = puzzle_dlx->ids + i;
+        puzzle_dlx->ids[i] = i;
     }
-    root->id = NULL;
+    puzzle_dlx->root.id = NULL;
 
     /* add the 729 rows to the matrix.  This is done by looping through all 729
      * cell-number combinations, calculating the correct column ids, and writing
@@ -168,9 +167,51 @@ static void init(hnode *root, hnode columns[], int ids[], node nodes[][NTYPES])
             for (k = 1; k < 9 + 1; k++) {   /* number */
                 /* (i, j, k) is the number k in row i, column j */
                 get_ids(col_ids, i, j, k);
-                dlx_make_row(nodes[r], columns, col_ids, NTYPES);
+                dlx_make_row(puzzle_dlx->nodes[r], puzzle_dlx->headers,
+                             col_ids, NTYPES);
                 r++;
             }
+}
+
+static int
+process_givens(const char *givens, sudoku_dlx *puzzle_dlx, node *solution[])
+{
+    size_t n, i;
+    int c;
+    node *ni;
+    /* eliminate givens one at a time: iterate through all 81 cells */
+    n = 0;      /* num givens found so far */
+    for (i = 0; i < 81; i++) {
+        /* could also just use isdigit, but w/e */
+        c = givens[i] - '0';
+        if (c > 0 && c <= 9) { /* c is a digit */
+            /* given how row order from init matches input cell order, row index
+             * is simple to calculate; pick any node in the row (i.e. first
+             * one), and force select it */
+            ni = puzzle_dlx->nodes[i * 9 + c - 1];
+            if (dlx_force_row(ni) != 0) {
+                /* non-zero return means ni has already been removed, meaning
+                 * it conflicts with a previously encountered given, so puzzle
+                 * is invalid; anything > 81 will do since you can only have
+                 * 81 givens */
+                n = 255;
+                break;
+            }
+            solution[n++] = ni;     /* add given row to solution, increment count */
+        }
+    }
+    return n;
+}
+
+/** @brief convert solution rows to 81 char string form */
+static void to_simple_string(char *buf, node *solution[], size_t len)
+{
+    size_t n, i;
+    for (i = 0; i < len; i++) {
+        n = row2row_id(solution[i]); /* see init() comments for row id order */
+        buf[n / 9] = n % 9 + '1';
+    }
+    buf[len] = '\0';
 }
 
 /**
@@ -184,62 +225,21 @@ static void init(hnode *root, hnode columns[], int ids[], node nodes[][NTYPES])
  */
 int sudoku_solve(const char *puzzle, char *buf)
 {
-    /* data structures as described in file comment above */
-    hnode root;
-    hnode headers[NCOLS];
-    int   ids[NCOLS];
-    node  nodes[NROWS][NTYPES];
+    sudoku_dlx puzzle_dlx;
     node  *solution[81];
+    size_t n;
 
-    /* other local variables */
-    int c;
-    size_t s, n, i;
-    node *ni;
+    init(&puzzle_dlx);  /* make full sudoku dlx array */
 
-    /* char * representation to dlx conversion algorithm:
-     * fill the dlx sparse matrix with all possible rows, then apply the givens
-     * one at a time using the forced row selection of the dlx module
-     */
+    if ((n = process_givens(puzzle, &puzzle_dlx, solution)) > 81)
+        return -1;      /* invalid givens, no solution possible */
 
-    init(&root, headers, ids, nodes);
+    n += dlx_exact_cover(solution + n, &puzzle_dlx.root, 0);
 
-    /* process givens: iterate through all cells */
-    n = 0;      /* num givens found so far */
-    for (i = 0; i < 81; i++) {
-        /* could also just use isdigit, but w/e */
-        c = puzzle[i] - '0';
-        if (c > 0 && c <= 9) { /* c is a digit */
-            /* given how row order from init matches input cell order, row index
-             * is simple to calculate
-             * pick any node in the row (i.e. first one), and force select it */
-            ni = nodes[i * 9 + c - 1];
-            if (dlx_force_row(ni) != 0) {
-                /* non-zero return means ni has already been removed, meaning
-                 * it conflicts with a previously encountered given, so puzzle
-                 * is invalid */
-                n = -1u;
-                break;
-            }
-            solution[n++] = ni;     /* add given row to solution, increment count */
-        }
-    }
-
-    /* invalid givens, no point trying for a solution */
-    if (n > 81)
+    if (n < 81)     /* no solution found */
         return -1;
 
-    s = dlx_exact_cover(solution + n, &root, 0);
-    s += n;
-
-    if (s < 81)     /* no solution found */
-        return -1;
-
-    /* process solution into string form */
-    for (i = 0; i < s; i++) {
-        n = row2row_id(solution[i]);
-        buf[n / 9] = n % 9 + '1';
-    }
-    buf[81] = '\0';
+    to_simple_string(buf, solution, n);
 
     return 0;
 }
