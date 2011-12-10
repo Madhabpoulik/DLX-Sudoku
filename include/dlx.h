@@ -33,6 +33,7 @@ typedef struct node_s       node;
 typedef struct headnode_s   hnode;
 
 size_t dlx_exact_cover(node *solution[], hnode *root, size_t k);
+size_t dlx_has_covers(hnode *root, size_t k);
 
 int dlx_force_row(node *r);
 int dlx_unselect_row(node *r);

@@ -177,6 +177,64 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
 }
 
 /**
+ * @brief Exact cover DLX algorithm by Knuth, adapted to C.
+ * @param k     max number of solutions to find
+ * @return (k - n) where n is the number of solutions found up to a max of k
+ */
+size_t dlx_has_covers(hnode *root, size_t k)
+{
+    size_t min, n;  /* for finding column with min s */
+    node *i, *j, *c;
+    node *h = (node *) root;
+
+    /* if array has no columns left, we have found another solution */
+    if (h->right == h) {
+        /* internally, k = remaining number of solutions to try to find */
+        return k - 1;
+    }
+
+    /* find a column "*c" with min size "min" */
+    min = -1u;
+    c  = NULL;
+    i   = h;
+    while ((i = i->right) != h) {
+        n = ((hnode *) i)->s;
+        if (n < min) {
+            min = n;
+            c  = i;
+        }
+    }
+
+    cover((hnode *) c);
+
+    /* guess each row in column c one at a time and recurse */
+    i = c;
+    while ((i = i->down) != c) {
+        /* cover all of the columns in the new row */
+        j = i;
+        while ((j = j->right) != i)
+            cover(j->chead);
+
+        k = dlx_has_covers(root, k);
+
+        /* restore the node links: uncover in reverse order */
+        j = i;
+        while ((j = j->left) != i)
+            uncover(j->chead);
+
+        if (k == 0)     /* reached max number of solutions */
+            break;
+    }
+
+    /* end of loop with no solution found,
+     * so restore node links and backtrack */
+
+    uncover((hnode *) c);
+
+    return k;
+}
+
+/**
  * @brief Extra utility function to modify the matrix by selecting row r and
  * covering all columns it covers.
  *
