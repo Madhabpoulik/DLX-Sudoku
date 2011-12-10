@@ -243,3 +243,30 @@ int sudoku_solve(const char *puzzle, char *buf)
 
     return 1;
 }
+
+/**
+ * @brief Tries to find up to n solutions and returns one of them
+ *
+ * @return 0 if unsolvable, else, number of solutions found
+ */
+size_t sudoku_nsolve(const char *puzzle, char *buf, size_t n)
+{
+    sudoku_dlx  puzzle_dlx;
+    node        *solution[81];
+    size_t      s, a;
+
+    init(&puzzle_dlx);
+    if ((s = process_givens(puzzle, &puzzle_dlx, solution)) > 81)
+        return 0;   /* invalid givens, no solution */
+
+    a = dlx_has_covers(&puzzle_dlx.root, n);
+
+    s += dlx_exact_cover(solution + s, &puzzle_dlx.root, 0);
+
+    if (s < 81)     /* no solution */
+        return 0;
+
+    to_simple_string(buf, solution, s);
+
+    return n - a;
+}

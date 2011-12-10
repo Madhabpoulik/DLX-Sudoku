@@ -24,6 +24,7 @@ typedef struct {
     node  nodes[NROWS][NTYPES];
 } sudoku_dlx;
 
-int sudoku_solve(const char *puzzle, char *buf);
+int     sudoku_solve(const char *puzzle, char *buf);
+size_t  sudoku_nsolve(const char *puzzle, char *buf, size_t n);
 
 #endif
