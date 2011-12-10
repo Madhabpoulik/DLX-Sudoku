@@ -20,6 +20,8 @@ test: ${DLX} ${MATRIX} test.o
 
 OBJ = ${DLX} ${SUDOKU} ${MATRIX} main.o test.o
 
+main.o: CFLAGS += -D _POSIX_C_SOURCE=200809
+
 ${DLX}: %.o: ${DLX_DIR}/%.c
 	${CC} ${CFLAGS} -c $<
 
