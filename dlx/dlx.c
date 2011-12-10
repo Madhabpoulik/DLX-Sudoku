@@ -61,13 +61,13 @@ static void cover(hnode *chead)
     node *i, *j;
     node *c = (node *) chead;
 
-    /* An illustration: x represents nodes to remove. 
-     *                  c is a column header. 
+    /* An illustration: x represents nodes to remove.
+     *                  c is a column header.
      *                  n is a normal node
      *
      * c c c x c c
      * n   n   n
-     *   x   x x  
+     *   x   x x
      *   n     n n
      *     x x   x
      */
@@ -93,7 +93,7 @@ static void uncover(hnode *chead)
     node *i, *j;
     node *c = (node *) chead;
 
-    /* for each row i in column ... 
+    /* for each row i in column ...
      * traversed in opposite order from cover() */
     i = c;
     while ((i = i->up) != c) {
@@ -124,7 +124,7 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
          * call stack somehow.  In order for this to be general enough to allow
          * the client code to print the solutions however it wants, we have to
          * unwind the stack all the way back to the client while keeping the
-         * solutions intact.  
+         * solutions intact.
          */
         return k;
     }
@@ -151,7 +151,7 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
 
         /* cover all of the columns in the new row */
         j = i;
-        while ((j = j->right) != i) 
+        while ((j = j->right) != i)
             cover(j->chead);
 
         n = dlx_exact_cover(solution, root, k + 1);     /* recurse */
@@ -164,7 +164,7 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
         /* if the recursive calls succeeded, a solution has been found with the
          * current row, don't bother with the rest
          */
-        if (n > 0) 
+        if (n > 0)
             break;
     }
 
@@ -178,7 +178,7 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
 
 /**
  * @brief Extra utility function to modify the matrix by selecting row r and
- * covering all columns it covers.  
+ * covering all columns it covers.
  *
  * This can be useful if you want to force a certain row to be included in the
  * solution (hence the name).
@@ -188,7 +188,7 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
 int dlx_force_row(node *r)
 {
     node *i = r;
-    if (is_removed_ud(r)) 
+    if (is_removed_ud(r))
         return -1;
 
     do {
