@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     char puzzle[82];
     char solution[82];
     if (NULL != fgets(puzzle, sizeof(puzzle), stdin)) {
-        if (sudoku_solve(puzzle, solution) != -1) {
+        if (sudoku_solve(puzzle, solution)) {
             printf("%s\n", solution);
             exit(0);
         } else {

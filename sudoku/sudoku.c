@@ -219,27 +219,27 @@ static void to_simple_string(char *buf, node *solution[], size_t len)
  * @param puzzle    81 char string representing puzzle.  Cells go in order left
  *                  to right, top to bottom; char '1' - '9' represent
  *                  corresponding digits; any other char represents a blank
- * @param buf   char array, must have space 82 characters long to hold
+ * @param buf   char array, must be 82 characters long to hold
  *              solution and null terminator byte.
- * @return -1 if unsolveable, 0 if solution found.
+ * @return 0 if unsolveable, 1 if solution found.
  */
 int sudoku_solve(const char *puzzle, char *buf)
 {
-    sudoku_dlx puzzle_dlx;
-    node  *solution[81];
-    size_t n;
+    sudoku_dlx  puzzle_dlx;
+    node        *solution[81];
+    size_t      n;
 
     init(&puzzle_dlx);  /* make full sudoku dlx array */
 
     if ((n = process_givens(puzzle, &puzzle_dlx, solution)) > 81)
-        return -1;      /* invalid givens, no solution possible */
+        return 0;      /* invalid givens, no solution possible */
 
     n += dlx_exact_cover(solution + n, &puzzle_dlx.root, 0);
 
     if (n < 81)     /* no solution found */
-        return -1;
+        return 0;
 
     to_simple_string(buf, solution, n);
 
-    return 0;
+    return 1;
 }
