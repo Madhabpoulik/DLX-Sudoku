@@ -7,8 +7,8 @@ DLX Sudoku
 :Date: Dec 2011
 :Version: 0.1
 
-Components
-==========
+Hacking guide
+=============
 
 * DLX module
 * Sudoku module
@@ -28,6 +28,13 @@ functions to make constructing the interlocking linked lists easier.
 .. _Knuth's paper:
 __ http://www-cs-faculty.stanford.edu/~uno/papers/dancing-color.ps.gz
 
+Feature list
+^^^^^^^^^^^^
+
+* ``dlx_exact_cover`` finds an exact cover if one exists
+* ``dlx_has_cover`` tries to see how many solutions exist, up to the
+  provided max.  It does not actually return any solutions. 
+
 Sudoku
 ------
 
@@ -45,7 +52,17 @@ are sent to standard output.  The representation used for input and
 output Sudoku puzzles is a string of 81 characters, each one
 representing a cell in the 9x9 sudoku grid, from left to right, top to
 bottom.  Digits 1-9 are represented by the characters '1' - '9', and any
-other character is treated as a blank.
+other character is treated as a blank.  Try ``ssudoku -h`` (currently an
+invalid option) to get it to print out the usage help.
+
+Feature list
+^^^^^^^^^^^^
+
+* ``sudoku_solve`` is the sudoku specific version of
+  ``dlx_exact_cover``: it finds a solution if one exists and stops
+* ``sudoku_nsolve`` is the sudoku specific version of ``dlx_has_cover``,
+  except that it also returns a single solution on top of verifying the
+  existence of other ones.
 
 Matrix
 ------
