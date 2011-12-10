@@ -162,10 +162,10 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
             uncover(j->chead);
 
         /* if the recursive calls succeeded, a solution has been found with the
-         * current row, don't bother with the rest; return and unwind the stack
+         * current row, don't bother with the rest
          */
         if (n > 0) 
-            return n;
+            break;
     }
 
     /* end of loop with no solution found,
