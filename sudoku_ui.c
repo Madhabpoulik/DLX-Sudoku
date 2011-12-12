@@ -72,7 +72,6 @@ int main(int argc, char *argv[])
                     move_cursor(&ncboard, cr, cc);
                 }
                 break;
-
         }
         refresh();
     }

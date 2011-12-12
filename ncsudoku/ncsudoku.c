@@ -72,6 +72,7 @@ void draw_cell(NcSudokuGrid *ncboard, int r, int c)
     cell_center_yx(ncboard, &y, &x);
     mvwaddch(win, y, x, v);
     wmove(win, y, x);       /* put cursor back */
+    wattrset(win, A_NORMAL);
 }
 
 /** @brief initialize ncboard members */

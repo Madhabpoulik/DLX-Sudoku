@@ -8,8 +8,8 @@
  * characters, so 1 is represented by ASCII '1', not the value 1.
  */
 
-#include "sudoku_grid.h"
 #include <stddef.h>
+#include "sudoku_grid.h"
 
 /** grid and cell flags */
 #define SC_FIXED     0x01
@@ -123,7 +123,7 @@ void toggle_fix_mode(SudokuGrid *board)
         for (i = 0; i < 81; i++, cell++)
             cell->flags &= ~ SC_FIXED;
     else {
-        /* fix all cells */
+        /* fix all cells that are filled in */
         for (i = 0; i < 81; i++, cell++) {
             v = cell->val;
             if (v >= '1' && v <= '9')
