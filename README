@@ -7,11 +7,16 @@ DLX Sudoku
 :Date: Dec 2011
 :Version: 0.1
 
+**NEW:** Curses interface; see below for details.
+
 Hacking guide
 =============
 
 * DLX module
 * Sudoku module
+
+  * Curses UI 
+
 * Matrix module
 
 DLX
@@ -64,6 +69,28 @@ Feature list
   except that it also returns a single solution on top of verifying the
   existence of other ones.
 
+Curses Interface
+----------------
+
+There is a curses sudoku interface in ``sudoku_ui.c``, which also
+depends on files in ``ncsudoku``, ``sudoku_grid``, and ``curseslib``.
+At the moment, only it can only do editing and filling in numbers, and
+has not been connected with the solver yet.  The executable is named
+``ssudoku2`` although this will probably be changed in the future.
+
+* ``curseslib/curseslib.c`` provides a single curses grid-drawing
+  function which draws "tic-tac-toe" type grids with parameterizable x
+  and y intervals and repeat counts, along with an optional outer
+  border.  It is used to draw the sudoku grid.
+* ``sudoku/sudoku_grid.c`` provides a SudokuGrid struct which can be
+  used to represent an interactively editable sudoku board.  It supports
+  setting and clearing cell values.  It also has an option to fix the
+  current board as givens, and an undo history that begins recording
+  once the givens have been fixed.
+* ``ncsudoku`` provides the curses structures and display functions for
+  drawing a sudoku grid.  It depends on the SudokuGrid functions for its
+  backend data store.
+
 Matrix
 ------
 
@@ -78,9 +105,9 @@ Compiling
 =========
 ::
 
-    make ssudoku
+    make 
     make test
 
-There are two executable makefile targets.  The sudoku solver described
-above in _`Sudoku` is ``ssudoku``, and the matrix test program described
-in _`Matrix` is ``test``.
+The first target, ``all``, creates the ``ssudoku`` and ``ssudoku2``
+executables described in the _`Sudoku` section above.  The second
+creates the matrix test program described in _`Matrix`, ``test``.

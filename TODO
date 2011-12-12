@@ -23,6 +23,8 @@ constraint column id and number of candidates
 any time user requests a hint, give the first cell the algorithm chose that is
 not in the user's board
 
+TODO: hook up curses interface with solver / hint modules
+
 Far future
 ==========
 
@@ -41,7 +43,7 @@ interface capabilities
       * begin undo history
     * provide hint
 
-hints
+how to display hints?
     * forced move hints
       * cell constraint: highlight cell with only one candidate
       * row constraint: highlight row, display number
@@ -55,19 +57,23 @@ hints
 
 keys
 
-    * up, down, left, right: hjkl
-    * 1 - 9 : 1-9
-    * undo: u
-    * redo: r
-    * erase cell: x, d, ., space
-    * undo all: c
-    * clear all: C
-    * refresh screen: ^L
-    * hint: h
-    * go to hint location: h
-    * go to next cell: space
-    * fill hint: H (for lazy people and guess hints)
-    * solve everything: S
-    * quit: q
-    * set givens: <enter>
-    * display keys: ?
+    * DONE
+
+        * up, down, left, right: hjkl
+        * 1 - 9 : 1-9
+        * undo: u
+        * undo all: c
+        * redo: r
+        * erase cell: d, space
+        * toggle fix givens: f
+        * quit: q
+
+    * TODO
+
+        * refresh screen: ^L
+        * display keys: ?
+        * hint: h
+        * go to hint location: h
+        * go to next cell: space
+        * fill hint: H (for lazy people and guess hints)
+        * solve everything: S
