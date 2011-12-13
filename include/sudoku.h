@@ -34,5 +34,6 @@ int     sudoku_solve(const char *puzzle, char *buf);
 size_t  sudoku_nsolve(const char *puzzle, char *buf, size_t n);
 int     sudoku_solve_hints(const char *puzzle, sudoku_hint hints[]);
 size_t  hint2cells(sudoku_hint *hint, int cell_ids[]);
+void    hint2rcn(sudoku_hint *hint, int *r, int *c, int *n);
 
 #endif
