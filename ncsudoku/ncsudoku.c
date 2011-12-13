@@ -107,7 +107,9 @@ void draw_board(NcSudokuGrid *ncboard)
     int bx = ncboard->x;
     getyx(win, save_cursor_y, save_cursor_x);
     /* outermost grid */
+    wattron(win, A_BOLD);
     wgrid(win, by, 3 * (h + 1), 3, bx, 3 * (w + 1), 3, 1);
+    wattroff(win, A_BOLD);
     /* small grids in each region */
     for (i = 0; i < 3; i++) {
         y = by + 1 + i * 3 * (h + 1);
