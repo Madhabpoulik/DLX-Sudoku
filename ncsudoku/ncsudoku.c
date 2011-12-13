@@ -150,6 +150,16 @@ void unhighlight_cell(NcSudokuGrid *ncboard, int r, int c)
     draw_cell(ncboard, r, c);
 }
 
+/** */
+void unhighlight_all(NcSudokuGrid *ncboard)
+{
+    int i;
+    NcSudokuCell *cell = ncboard->cells;
+    for (i = 0; i < 81; i++, cell++)
+        cell->flags &= ~ NCSC_HIGHLIGHT;
+}
+
+
 /** @brief move cursor to cell */
 void move_cursor(NcSudokuGrid *ncboard, int r, int c)
 {

@@ -28,6 +28,7 @@ void draw_cell(NcSudokuGrid *ncboard, int r, int c);
 
 void highlight_cell(NcSudokuGrid *ncboard, int r, int c);
 void unhighlight_cell(NcSudokuGrid *ncboard, int r, int c);
+void unhighlight_all(NcSudokuGrid *ncboard);
 
 void move_cursor(NcSudokuGrid *ncboard, int r, int c);
 
