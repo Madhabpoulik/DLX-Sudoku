@@ -14,7 +14,7 @@ typedef enum {
     ROW_ID,
     COL_ID,
     REGION_ID
-} id_t;
+} constraint_type;
 
 /** @brief Data structures for dlx representation of a 9x9 sudoku */
 typedef struct {
@@ -24,7 +24,15 @@ typedef struct {
     node  nodes[NROWS][NTYPES];
 } sudoku_dlx;
 
+typedef struct {
+    int constraint_id;  /**< see sudoku.c */
+    int solution_id;    /**< see sudoku.c */
+    int nchoices;       /**< number of other possible choices at the time */
+} sudoku_hint;
+
 int     sudoku_solve(const char *puzzle, char *buf);
 size_t  sudoku_nsolve(const char *puzzle, char *buf, size_t n);
+int     sudoku_solve_hints(const char *puzzle, sudoku_hint hints[]);
+size_t  hint2cells(sudoku_hint *hint, int cell_ids[]);
 
 #endif

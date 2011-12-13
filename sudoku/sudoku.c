@@ -279,3 +279,72 @@ size_t sudoku_nsolve(const char *puzzle, char *buf, size_t n)
 
     return n - a;
 }
+
+/**
+ * @brief solves puzzle with solution hints
+ * @param puzzle    81 char string representing puzzle, plus null terminator.  
+ *                  Cells go in order left to right, top to bottom; char '1' -
+ *                  '9' represent corresponding digits; any other char
+ *                  represents a blank.
+ * @param hints     81 hints
+ * @return 0 if unsolveable, 1 if solution found.
+ */
+int sudoku_solve_hints(const char *puzzle, sudoku_hint hints[])
+{
+    sudoku_dlx  puzzle_dlx;
+    node        *solution[81];
+    dlx_hint    dlx_hints[81];
+    size_t      n;
+
+    init(&puzzle_dlx);  /* make full sudoku dlx array */
+
+    if ((n = process_givens(puzzle, &puzzle_dlx, solution)) > 81)
+        return 0;      /* invalid givens, no solution possible */
+
+    n += dlx_exact_cover_hints(dlx_hints + n, &puzzle_dlx.root, 0);
+
+    if (n < 81)     /* no solution found */
+        return 0;
+
+    /* fill hints */
+    for (n = 0; n < 81; n++) {
+        hints[n].constraint_id = *((int *) dlx_hints[n].row->chead->id);
+        hints[n].solution_id = row2row_id(dlx_hints[n].row);
+        hints[n].nchoices = dlx_hints[n].s;
+    }
+
+    return 1;
+}
+
+/**
+ * @brief given hint, fill cell_ids with cell id's of cells the hint covers
+ *
+ * @return number of cells the hint covers; for standard sudoku, this is 1 or 9
+ */
+size_t hint2cells(sudoku_hint *hint, int cell_ids[])
+{
+    size_t i;
+    int r, c, n, R; 
+    int constraint_id = hint->constraint_id;
+    r = c = n = R = 0;
+
+    fill_values(constraint_id, &r, &c, &n, &R);
+    
+    i = 0;
+    if (constraint_id < (CELL_ID + 1) * 81) {
+        cell_ids[0] = 9 * (r - 1) + c - 1;
+    } else if (constraint_id < (ROW_ID + 1) * 81) {
+        for (i = 0; i < 9; i++) /* i = 0-indexed c */
+            cell_ids[i] = 9 * (r - 1) + i;
+    } else if (constraint_id < (COL_ID + 1) * 81) {
+        for (i = 0; i < 9; i++) /* i = 0-indexed r */
+            cell_ids[i] = 9 * (i) + c - 1;
+    } else { /* (constraint_id < (REGION_ID + 1) * 81) */
+        /* reverse formala for R from get_ids, but use 0-indexing */
+        r = (R - 1) / 3 * 3;    /* r = 0-indexed version of r */
+        c = (R - 1) % 3 * 3;    /* c = 0-indexed version of c */
+        for (i = 0; i < 9; i++)
+            cell_ids[i] = (r + i / 3) * 9 + c + i % 3;
+    }
+    return i;
+}
