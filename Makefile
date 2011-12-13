@@ -2,6 +2,7 @@
 
 DEBUG = -g
 CFLAGS = -ansi -Wall -pedantic -I ${IDIR} ${DEBUG}
+CTAGS = ctags
 IDIR = include/
 MAKEDEPFLAG = -M
 
@@ -54,6 +55,9 @@ ${NCSUDOKU}: %.o: ${NCSUDOKU_DIR}/%.c
 
 depend: */*.c *.c
 	${CC} ${CFLAGS} ${MAKEDEPFLAG} $^ > $@
+
+tags: */*.c *.c
+	${CTAGS} $^
 
 clean: 
 	-rm -f ${OBJ} test ssudoku ssudoku2
