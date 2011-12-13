@@ -51,6 +51,9 @@
  *   - 324 column id's
  *   - 729x4 internal nodes
  *   - 81 rows in solution
+ *
+ * For how (r, c, n) maps back and forth to constraint column id's and row id's
+ * see the get_ids / fill_values / hint2cells and row_id / hint2rcn functions
  */
 
 #include <stdlib.h>
@@ -79,9 +82,7 @@ static void get_ids(int col_ids[], int r, int c, int n)
     col_ids[REGION_ID]  = REGION_ID * 81 + (9 * R) - 9 + n - 1;
 }
 
-/**
- * @brief Computes row index given digit n in row r col c
- */
+/** @return row index given digit n in row r col c */
 static size_t row_id(int r, int c, int n)
 {
     return ((9 * r) - 9 + c - 1) * 9 + n - 1;
@@ -294,12 +295,19 @@ int sudoku_solve_hints(const char *puzzle, sudoku_hint hints[])
     sudoku_dlx  puzzle_dlx;
     node        *solution[81];
     dlx_hint    dlx_hints[81];
-    size_t      n;
+    size_t      n, i;
 
     init(&puzzle_dlx);  /* make full sudoku dlx array */
 
     if ((n = process_givens(puzzle, &puzzle_dlx, solution)) > 81)
         return 0;      /* invalid givens, no solution possible */
+
+    /* fill hints for the givens */
+    for (i = 0; i < n; i++) {
+        hints[i].constraint_id = *((int *) solution[i]->chead->id);
+        hints[i].solution_id = row2row_id(solution[i]);
+        hints[i].nchoices = 1;  /* it's a given; only 1 choice available */
+    }
 
     n += dlx_exact_cover_hints(dlx_hints + n, &puzzle_dlx.root, 0);
 
@@ -314,6 +322,15 @@ int sudoku_solve_hints(const char *puzzle, sudoku_hint hints[])
     }
 
     return 1;
+}
+
+/** @brief convert hint to row, col, number */
+void hint2rcn(sudoku_hint *hint, int *r, int *c, int *n)
+{
+    size_t row = hint->solution_id;
+    *r = row / 81 + 1;
+    *c = row / 9 % 9 + 1;
+    *n = row % 81 + 1;
 }
 
 /**

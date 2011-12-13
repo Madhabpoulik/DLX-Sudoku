@@ -25,9 +25,9 @@ typedef struct {
 } sudoku_dlx;
 
 typedef struct {
-    int constraint_id;  /**< see sudoku.c */
-    int solution_id;    /**< see sudoku.c */
-    int nchoices;       /**< number of other possible choices at the time */
+    int    constraint_id;  /**< see sudoku.c */
+    size_t solution_id;    /**< see sudoku.c */
+    int    nchoices;       /**< number of other possible choices at the time */
 } sudoku_hint;
 
 int     sudoku_solve(const char *puzzle, char *buf);
