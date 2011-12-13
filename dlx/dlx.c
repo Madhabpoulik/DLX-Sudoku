@@ -313,7 +313,7 @@ hnode *dlx_make_headers(hnode *root, hnode *headers, size_t n)
     ni->right   = (node *) (headers + 1);
     ni->up      = ni;
     ni->down    = ni;
-    ni->chead   = NULL;
+    ni->chead   = (hnode *) ni;
     headers->s  = 0;
 
     /* from 2nd to 2nd to last column header */
@@ -323,7 +323,7 @@ hnode *dlx_make_headers(hnode *root, hnode *headers, size_t n)
         ni->right   = (node *) (headers + i + 1);
         ni->up      = ni;
         ni->down    = ni;
-        ni->chead   = NULL;
+        ni->chead   = (hnode *) ni;
         ((hnode *) ni)->s   = 0;
     }
 
@@ -333,7 +333,7 @@ hnode *dlx_make_headers(hnode *root, hnode *headers, size_t n)
     ni->right   = h;
     ni->up      = ni;
     ni->down    = ni;
-    ni->chead   = NULL;
+    ni->chead   = (hnode *) ni;
     ((hnode *) ni)->s   = 0;
 
     return root;

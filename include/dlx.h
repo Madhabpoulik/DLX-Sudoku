@@ -26,7 +26,7 @@ struct node_s {
 struct headnode_s {
     struct node_s base_node;
     size_t        s;    /**< number of nodes in the list, excluding itself */
-    void          *id;  /**< unique identifier for the node list */
+    const void    *id;  /**< unique identifier for the node list */
 };
 
 typedef struct node_s       node;
