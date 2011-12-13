@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
     /* read 81 char, else error exit */
     while ((n = strlen(puzzle)) < 81) {
-        if (NULL == fgets(puzzle, sizeof(puzzle), stdin))
+        if (NULL == fgets(puzzle + n, sizeof(puzzle) - n, stdin))
             break;
     }
     if ((n = strlen(puzzle)) < 81) {
