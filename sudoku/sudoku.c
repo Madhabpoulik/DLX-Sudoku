@@ -315,10 +315,10 @@ int sudoku_solve_hints(const char *puzzle, sudoku_hint hints[])
         return 0;
 
     /* fill hints */
-    for (n = 0; n < 81; n++) {
-        hints[n].constraint_id = *((int *) dlx_hints[n].row->chead->id);
-        hints[n].solution_id = row2row_id(dlx_hints[n].row);
-        hints[n].nchoices = dlx_hints[n].s;
+    for (; i < 81; i++) {
+        hints[i].constraint_id = *((int *) dlx_hints[n].row->chead->id);
+        hints[i].solution_id = row2row_id(dlx_hints[n].row);
+        hints[i].nchoices = dlx_hints[n].s;
     }
 
     return 1;
