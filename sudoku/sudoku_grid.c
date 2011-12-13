@@ -166,17 +166,16 @@ int undo_board(SudokuGrid *board)
 }
 
 /**
- * @brief in unfixed mode, clear all values in board; clear all unfixed values
- * in fixed mode.
+ * @brief in unfixed mode, clear all values in board; in fixed mode, undo all
+ * entries.
  */
 void clear_board(SudokuGrid *board)
 {
     int i;
     SudokuCell *cell = board->cells;
     if (is_fixed(board)) {
-        for (i = 0; i < 81; i++, cell++) 
-            if (!(cell->flags & SC_FIXED))
-                cell->val = EMPTY_CELL_VAL;
+        for (i = board->undo_pos; i > 0; i--) 
+            undo_board(board);
     } else {
         for (i = 0; i < 81; i++, cell++)
             cell->val = EMPTY_CELL_VAL;
