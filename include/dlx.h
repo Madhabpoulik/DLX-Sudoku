@@ -32,8 +32,15 @@ struct headnode_s {
 typedef struct node_s       node;
 typedef struct headnode_s   hnode;
 
+typedef struct {
+    node *row;          /**< row being include in the solution */
+    const void *id;     /**< id of column constraint being filled */
+    size_t s;           /**< number of other rows in the column at the time */
+} dlx_hint;
+
 size_t dlx_exact_cover(node *solution[], hnode *root, size_t k);
 size_t dlx_has_covers(hnode *root, size_t k);
+size_t dlx_exact_cover_hints(dlx_hint solution[], hnode *root, size_t k);
 
 int dlx_force_row(node *r);
 int dlx_unselect_row(node *r);

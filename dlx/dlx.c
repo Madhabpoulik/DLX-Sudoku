@@ -177,6 +177,78 @@ size_t dlx_exact_cover(node *solution[], hnode *root, size_t k)
 }
 
 /**
+ * @brief Run exact cover DLX algorithm by Knuth, adapted to C, and also
+ * include extra hint information.
+ * @return 0 if no solution, size of solution otherwise
+ */
+size_t dlx_exact_cover_hints(dlx_hint solution[], hnode *root, size_t k)
+{
+    size_t min, n;  /* for finding column with min s */
+    node *i, *j, *c;
+    node *h = (node *) root;
+
+    /* if array has no columns left, we are done */
+    if (h->right == h) {
+        /* Knuth's version: print solutions here, and break out of the recursive
+         * call stack somehow.  In order for this to be general enough to allow
+         * the client code to print the solutions however it wants, we have to
+         * unwind the stack all the way back to the client while keeping the
+         * solutions intact.
+         */
+        return k;
+    }
+
+    /* find a column "*c" with min size "min" */
+    min = -1u;
+    c  = NULL;
+    i   = h;
+    while ((i = i->right) != h) {
+        n = ((hnode *) i)->s;
+        if (n < min) {
+            min = n;
+            c  = i;
+        }
+    }
+
+    cover((hnode *) c);
+
+    n = 0;      /* return value if c is empty */
+    /* guess each row in column c one at a time and recurse */
+    i = c;
+    /* record column info for hint */
+    solution[k].id = ((hnode *) c)->id;
+    solution[k].s = ((hnode *) c)->s;
+    while ((i = i->down) != c) {
+        solution[k].row = i;   /* record solution row */
+
+        /* cover all of the columns in the new row */
+        j = i;
+        while ((j = j->right) != i)
+            cover(j->chead);
+
+        n = dlx_exact_cover_hints(solution, root, k + 1);     /* recurse */
+
+        /* restore the node links: uncover in reverse order */
+        j = i;
+        while ((j = j->left) != i)
+            uncover(j->chead);
+
+        /* if the recursive calls succeeded, a solution has been found with the
+         * current row, don't bother with the rest
+         */
+        if (n > 0)
+            break;
+    }
+
+    /* end of loop with no solution found,
+     * so restore node links and backtrack */
+
+    uncover((hnode *) c);
+
+    return n;   /* n should be 0 */
+}
+
+/**
  * @brief Exact cover DLX algorithm by Knuth, adapted to C.
  * @param k     max number of solutions to find
  * @return (k - n) where n is the number of solutions found up to a max of k
