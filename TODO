@@ -9,21 +9,10 @@ non-unique)
 compute unique solution and save order the cells are filled along with
 constraint column id and number of candidates
 
-    TODO: dlx: add a version of exact_cover which also populates arrays
-    parallel to the solution array recording the constraint column id of each
-    row when it was picked and the number of other rows in that column at the
-    time
-
-    TODO: sudoku: add a solver interface that returns not just the solution,
-    but also all of the above extra information
-
-    TODO: come up with a data structure to put in the header file for passing
-    such info
-
 any time user requests a hint, give the first cell the algorithm chose that is
 not in the user's board
 
-TODO: hook up curses interface with solver / hint modules
+TODO: add a next_hint function in sudoku.c
 
 Far future
 ==========
@@ -31,29 +20,8 @@ Far future
 curses interface: see curses.mockup.txt;
 
     TODO: finish designing the visual look
-
-interface capabilities
-
-    * fill cell
-    * undo
-    * undo (clear) all
-    * new puzzle (clear entire board)
-    * set givens
-      * test puzzle validity and solve
-      * begin undo history
-    * provide hint
-
-how to display hints?
-    * forced move hints
-      * cell constraint: highlight cell with only one candidate
-      * row constraint: highlight row, display number
-      * col constraint: hilight column, display number
-      * region constraint: highlight region, display number
-    * guess hints
-      * cell constraint: highlight cell, display possibilities
-      * row constraint: highlight row, display number, highlight possible cells
-      * col constraint: highlight col, display number, highlight possible cells
-      * region constraint: highlight region, display number, highlight possible cells
+    TODO: add user message function to print stuff at the bottom
+    TODO: check for unique solution, disable hints when solution is not unique
 
 keys
 
@@ -63,17 +31,15 @@ keys
         * 1 - 9 : 1-9
         * undo: u
         * undo all: c
-        * redo: r
         * erase cell: d, space
         * toggle fix givens: f
         * quit: q
+        * solve board: s
 
     * TODO
 
         * refresh screen: ^L
         * display keys: ?
-        * hint: h
-        * go to hint location: h
-        * go to next cell: space
+        * show/hide hint: h
         * fill hint: H (for lazy people and guess hints)
-        * solve everything: S
+        * redo: r
