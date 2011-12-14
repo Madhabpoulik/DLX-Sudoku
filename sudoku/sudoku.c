@@ -256,8 +256,9 @@ int sudoku_solve(const char *puzzle, char *buf)
 }
 
 /**
- * @brief Tries to find up to n solutions and returns one of them
+ * @brief Tries to find up to n solutions 
  *
+ * @param buf   filled if not NULL, set to NULL to ignore
  * @return 0 if unsolvable, else, number of solutions found
  */
 size_t sudoku_nsolve(const char *puzzle, char *buf, size_t n)
@@ -277,7 +278,8 @@ size_t sudoku_nsolve(const char *puzzle, char *buf, size_t n)
     if (s < 81)     /* no solution */
         return 0;
 
-    to_simple_string(buf, solution, s);
+    if (buf != NULL)
+        to_simple_string(buf, solution, s);
 
     return n - a;
 }
