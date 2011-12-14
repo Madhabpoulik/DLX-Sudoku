@@ -353,6 +353,7 @@ size_t hint2cells(sudoku_hint *hint, int cell_ids[])
     i = 0;
     if (constraint_id < (CELL_ID + 1) * 81) {
         cell_ids[0] = 9 * (r - 1) + c - 1;
+        ++i;
     } else if (constraint_id < (ROW_ID + 1) * 81) {
         for (i = 0; i < 9; i++) /* i = 0-indexed c */
             cell_ids[i] = 9 * (r - 1) + i;
