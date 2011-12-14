@@ -22,12 +22,12 @@ OBJ = ${DLX} ${SUDOKU} ${MATRIX} ${CURSESLIB} ${NCSUDOKU} \
 
 all: ssudoku ssudoku2
 
-ssudoku: ${DLX} ${SUDOKU} main.o
+ssudoku: ${DLX} sudoku.o main.o
 	${CC} ${CFLAGS} -o $@ $^
 
 ssudoku2: LDFLAGS += -lncurses
 
-ssudoku2: sudoku_ui.o ${NCSUDOKU} ${CURSESLIB} sudoku_grid.o
+ssudoku2: sudoku_ui.o ${NCSUDOKU} ${CURSESLIB} ${SUDOKU} ${DLX}
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ $^
 
 test: ${DLX} ${MATRIX} test.o
