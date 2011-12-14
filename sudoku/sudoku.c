@@ -368,3 +368,16 @@ size_t hint2cells(sudoku_hint *hint, int cell_ids[])
     }
     return i;
 }
+
+/** @return next hint in line given current board state */
+sudoku_hint *next_hint(sudoku_hint hints[], char *board)
+{
+    int i;
+    char c;
+    for (i = 0; i < 81; i++) {
+        c = board[hints[i].solution_id / 9];
+        if (c < '1' || c > '9')
+           break;
+    }
+    return hints + i;
+}
