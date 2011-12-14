@@ -1,18 +1,15 @@
 Ideas for future development.
 
-Hint giving interface
-=====================
+Hint giving interface =====================
 
-make sure puzzle has unique solution (hints don't make sense if solution is
-non-unique)
+make sure puzzle has unique solution (hints don't make sense if solution
+is non-unique)
 
 compute unique solution and save order the cells are filled along with
 constraint column id and number of candidates
 
-any time user requests a hint, give the first cell the algorithm chose that is
-not in the user's board
-
-TODO: add a next_hint function in sudoku.c
+any time user requests a hint, give the first cell the algorithm chose
+that is not in the user's board
 
 Far future
 ==========
@@ -20,8 +17,6 @@ Far future
 curses interface: see curses.mockup.txt;
 
     TODO: finish designing the visual look
-    TODO: add user message function to print stuff at the bottom
-    TODO: check for unique solution, disable hints when solution is not unique
 
 keys
 
@@ -35,11 +30,16 @@ keys
         * toggle fix givens: f
         * quit: q
         * solve board: s
+        * display keys: ?
+        * display hint: H
+        * refresh screen: ^L
 
     * TODO
 
-        * refresh screen: ^L
-        * display keys: ?
-        * show/hide hint: h
-        * fill hint: H (for lazy people and guess hints)
+        * fill hint: ? (for laziness)
         * redo: r
+
+TODO: add file i/o interface or figure out how to make puzzle input less
+annoying/time consuming
+
+TODO: make board size configurable

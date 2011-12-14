@@ -78,6 +78,16 @@ At the moment, only it can only do editing and filling in numbers, and
 has not been connected with the solver yet.  The executable is named
 ``ssudoku2`` although this will probably be changed in the future.
 
+**NEW**: The current hints implementation works by recording the cell
+order that the algorithm uses to fill the puzzle.  Since DLX always
+chooses a constraint column with the fewest candidate rows, this is a
+reasonable way to approximate human solving.  The hints work as follows:
+all cells involved in the constraint being met are highlighted, so if it
+is a region constraint all 9 cells in the 3x3 region are highlighted.
+Further, if the constraint is a row/column/region constraint involving
+more than one cell, a hint message is displayed at the bottom to give
+the number to try.
+
 * ``curseslib/curseslib.c`` provides a single curses grid-drawing
   function which draws "tic-tac-toe" type grids with parameterizable x
   and y intervals and repeat counts, along with an optional outer
