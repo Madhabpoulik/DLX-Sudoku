@@ -58,7 +58,9 @@ char *get_values(SudokuGrid *board, char values[])
 /**
  * @brief fill givens with givens; operation is only valid if board is fixed
  *
- * @param givens    must have room for 82 char: 81 + null terminator
+ * @param givens    must have room for 82 char: 81 + null terminator; positions
+ *                  corresponding to givens are filled, and other positions are
+ *                  filled with a character not '1' - '9'
  * @return NULL if board givens not fixed, givens otherwise
  */
 char *get_givens(SudokuGrid *board, char givens[])
@@ -74,6 +76,7 @@ char *get_givens(SudokuGrid *board, char givens[])
         else
             *c = EMPTY_CELL_VAL;
     }
+    *c = '\0';
     return givens;
 }
 
@@ -149,8 +152,8 @@ int is_cell_fixed(SudokuGrid *board, int r, int c)
 
 /**
  * @brief Fixed mode only.  Undo last fill-in position.
- * @return 1D position of square undone, or 0 if nothing to undo, or -1 if
- * board is not in fixed mode
+ * @return 1D position of square undone, or -1 if nothing to undo or board is
+ * not in fixed mode
  */
 int undo_board(SudokuGrid *board)
 {
