@@ -25,7 +25,7 @@ all: ssudoku ssudoku2
 ssudoku: ${DLX} sudoku.o main.o
 	${CC} ${CFLAGS} -o $@ $^
 
-ssudoku2: LDFLAGS += -lncurses
+ssudoku2: LDFLAGS += -lpanel -lncurses
 
 ssudoku2: sudoku_ui.o ${NCSUDOKU} ${CURSESLIB} ${SUDOKU} ${DLX}
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ $^
