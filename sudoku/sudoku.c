@@ -53,7 +53,8 @@
  *   - 81 rows in solution
  *
  * For how (r, c, n) maps back and forth to constraint column id's and row id's
- * see the get_ids / fill_values / hint2cells and row_id / hint2rcn functions
+ * see the get_ids / fill_values / hint2cells and row_id / hint2rcn /
+ * to_simple_string functions
  */
 
 #include <stdlib.h>
@@ -316,9 +317,9 @@ int sudoku_solve_hints(const char *puzzle, sudoku_hint hints[])
 
     /* fill hints */
     for (; i < 81; i++) {
-        hints[i].constraint_id = *((int *) dlx_hints[n].row->chead->id);
-        hints[i].solution_id = row2row_id(dlx_hints[n].row);
-        hints[i].nchoices = dlx_hints[n].s;
+        hints[i].constraint_id = *((int *) dlx_hints[i].row->chead->id);
+        hints[i].solution_id = row2row_id(dlx_hints[i].row);
+        hints[i].nchoices = dlx_hints[i].s;
     }
 
     return 1;
@@ -330,7 +331,7 @@ void hint2rcn(sudoku_hint *hint, int *r, int *c, int *n)
     size_t row = hint->solution_id;
     *r = row / 81 + 1;
     *c = row / 9 % 9 + 1;
-    *n = row % 81 + 1;
+    *n = row % 9 + 1;
 }
 
 /**
