@@ -1,20 +1,7 @@
 Ideas for future development.
 
-Hint giving interface =====================
-
-make sure puzzle has unique solution (hints don't make sense if solution
-is non-unique)
-
-compute unique solution and save order the cells are filled along with
-constraint column id and number of candidates
-
-any time user requests a hint, give the first cell the algorithm chose
-that is not in the user's board
-
-Far future
-==========
-
-curses interface: see curses.mockup.txt;
+curses interface
+================
 
     TODO: finish designing the visual look
 
@@ -36,10 +23,15 @@ keys
 
     * TODO
 
-        * fill hint: ? (for laziness)
-        * redo: r
+        * fill hint: F (for laziness)
 
-TODO: add file i/o interface or figure out how to make puzzle input less
-annoying/time consuming
+TODO: add command line arguments.  specify cell width, cell height, and specify
+puzzle input file
 
-TODO: make board size configurable
+TODO: dimensions
+
+    TODO: ncsudoku: don't draw internal grid if cell height is only 1
+    TODO: add functions to ncsudoku to calculate and return dimensions 
+    TODO: make sure given dimensions will fit in terminal, complain otherwise.
+    TODO: handle terminal resize gracefully
+
