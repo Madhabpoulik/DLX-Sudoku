@@ -18,22 +18,22 @@ struct node_s {
     struct node_s     *left;  
     struct node_s     *right;
     struct node_s     *up;
-    struct node_s     *down;
-    struct headnode_s *chead;     /**< column header node */
+    struct node_s     *down;    
+    struct headnode_s *chead;   /**< column header node */
 };
 
 /** header node */
 struct headnode_s {
     struct node_s base_node;
-    size_t        s;    /**< number of nodes in the list, excluding itself */
-    const void    *id;  /**< unique identifier for the node list */
+    size_t        s;    /**< number of nodes in the list, excluding itself  */
+    const void    *id;  /**< pointer to unique identifier for the node list */
 };
 
 typedef struct node_s       node;
 typedef struct headnode_s   hnode;
 
 typedef struct {
-    node *row;          /**< row being include in the solution */
+    node *row;          /**< row being included in the solution */
     const void *id;     /**< id of column constraint being filled */
     size_t s;           /**< number of other rows in the column at the time */
 } dlx_hint;
