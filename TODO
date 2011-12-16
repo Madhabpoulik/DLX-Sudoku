@@ -35,3 +35,7 @@ TODO: dimensions
     TODO: make sure given dimensions will fit in terminal, complain otherwise.
     TODO: handle terminal resize gracefully
 
+    TODO: colors
+    TODO: highlight all of a number
+    TODO: detect and highlight collisions
+    TODO: fix hints to detect wrong entries
